@@ -1,5 +1,5 @@
 'use client'
-import GlobalStyle from "./globalStyles"
+import GlobalStyle from "../globalStyles"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { AuthProvider } from "../contexts/authContext"

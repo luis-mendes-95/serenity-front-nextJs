@@ -1,5 +1,10 @@
-import api from "../../app/services/api"
+import api from "../../services/api"
 import Link from "next/link";
+import { parseCookies } from "nookies";
+
+const cookies = parseCookies();
+
+const user_id = cookies["serenity.app.user_id"];
 
 interface User {
     id: string;
@@ -11,9 +16,9 @@ export default async function Header() {
 
   const userLoggedIn = false;
 
-  const userId = "0c7b454f-4412-4392-8e00-cb82682524b9"
-
-  const response = await api.get<User>(`users/${userId}`);
+  if(user_id){
+    const response = await api.get<User>(`users/${user_id}`);
+  }
 
   return (
     <>

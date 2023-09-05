@@ -6,7 +6,7 @@ import { ReactNode, createContext, useContext } from "react";
 import { toast } from "react-toastify";
 import { RegisterUser } from "../components/RegisterForm";
 import { LoginUser } from "../components/LoginForm";
-import api from "../app/services/api";
+import api from "../services/api";
 
 interface Props {
     children: ReactNode;
@@ -41,6 +41,10 @@ export const AuthProvider = ({children}: Props) => {
         .then((response) => {
             console.log(response)
             setCookie(null, "serenity.app.token", response.data.token), {
+                maxAge: 31536 * 1000,
+                path: "/"
+            };
+            setCookie(null, "serenity.app.user_id", response.data.user_id), {
                 maxAge: 31536 * 1000,
                 path: "/"
             };

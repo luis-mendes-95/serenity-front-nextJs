@@ -1,6 +1,6 @@
 'use client'
 
-import api from "../../app/services/api"
+import api from "../../services/api"
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
