@@ -1,77 +1,93 @@
-'use client'
+"use client";
 
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie } from "nookies";
-import { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { toast } from "react-toastify";
 import { RegisterBowl } from "../components/BowlRegisterForm";
-import { EditBowl } from "../components/BowlEditForm";
 import api from "../services/api";
+import { useAuth } from "./authContext";
 
 interface Props {
-    children: ReactNode;
+  children: ReactNode;
+}
+
+export interface Bowl {
+  id: string;
+  name: string;
+  amount: string;
+  user_id: string;
+  bowl_id: string;
 }
 
 interface bowlProviderData {
-    user_id: string;
-    register: (registerData: RegisterUser) => void;
-    login: (loginData: LoginUser) => void;
+  registerBowl: (registerData: RegisterBowl) => void;
+  editBowl: (editData: RegisterBowl) => void;
+  deleteBowl: (id: string) => void;
 }
 
-const AuthContext = createContext<bowlProviderData>({} as bowlProviderData)
+const BowlContext = createContext<bowlProviderData>({} as bowlProviderData);
 
-export const AuthProvider = ({children}: Props) => {
+export const BowlProvider = ({ children }: Props) => {
+  const { getUser, user_id } = useAuth();
 
-    const [user_id, setUserId] = useState("")
+  const router = useRouter();
 
-    useEffect(() => {
-        const cookies = parseCookies();
-        const id: string | undefined = cookies["serenity.app.user_id"];
-        setUserId(id)
-    }, [])
-    
+  const registerBowl = (registerData: RegisterBowl) => {
+    api
+      .post("/bowls", registerData)
+      .then(() => {
+        toast.success("Pote criado com sucesso!");
+        router.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao cadastrar pote");
+      });
+      getUser(user_id);
+  };
 
-    const router = useRouter()
+  const editBowl = (editData: RegisterBowl) => {
+    api
+      .patch("/bowls", editData)
+      .then(() => {
+        toast.success("Pote editado com sucesso!");
+        getUser(user_id);
+        router.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao editar pote");
+      });
 
-    const register = (registerData: RegisterUser) => {
-        api.post("/users", registerData)
-        .then(() => {
-            toast.success("Usuário cadastrado com sucesso!")
-            router.push("/login")
-        })
-        .catch((err) => {
-            console.log(err)
-            toast.error("Erro ao cadastrar usuário")
-        })
-    }
+  };
 
-    const login = (loginData: LoginUser) => {
-        api.post("/login", loginData)
-        .then((response) => {
-            setUserId(response.data.user_id)
-            console.log(response)
-            setCookie(null, "serenity.app.token", response.data.token), {
-                maxAge: 31536 * 1000,
-                path: "/"
-            };
-            setCookie(null, "serenity.app.user_id", response.data.user_id), {
-                maxAge: 31536 * 1000,
-                path: "/"
-            };
-            toast.success("Login efetuado com sucesso!")
-            router.push("/")
-        })
-        .catch((err) => {
-            console.log(err)
-            toast.error("Erro ao efetuar login")
-        })
-    };
-    return(
-        <AuthContext.Provider value={{ register, login, user_id }}>
-            {children}
-        </AuthContext.Provider>
-    )
+  const deleteBowl = (id: string) => {
+    api
+      .delete(`/bowls/${id}`)
+      .then(() => {
+        toast.success("Pote deletado com sucesso!");
+        getUser(user_id);
+        router.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao deletar pote");
+      });
 
+  };
+
+  return (
+    <BowlContext.Provider value={{ registerBowl, editBowl, deleteBowl }}>
+      {children}
+    </BowlContext.Provider>
+  );
 };
 
-export const useAuth = () => useContext(AuthContext)
+export const useBowl = () => useContext(BowlContext);
