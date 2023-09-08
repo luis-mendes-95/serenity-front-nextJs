@@ -1,25 +1,24 @@
 'use client'
 
 import { useRouter } from "next/navigation";
-import { destroyCookie, parseCookies, setCookie } from "nookies";
+import { parseCookies, setCookie } from "nookies";
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { RegisterUser } from "../components/RegisterForm";
-import { LoginUser } from "../components/LoginForm";
+import { RegisterBowl } from "../components/BowlRegisterForm";
+import { EditBowl } from "../components/BowlEditForm";
 import api from "../services/api";
 
 interface Props {
     children: ReactNode;
 }
 
-interface authProviderData {
+interface bowlProviderData {
     user_id: string;
     register: (registerData: RegisterUser) => void;
     login: (loginData: LoginUser) => void;
-    logout: () => void;
 }
 
-const AuthContext = createContext<authProviderData>({} as authProviderData)
+const AuthContext = createContext<bowlProviderData>({} as bowlProviderData)
 
 export const AuthProvider = ({children}: Props) => {
 
@@ -67,23 +66,11 @@ export const AuthProvider = ({children}: Props) => {
             toast.error("Erro ao efetuar login")
         })
     };
-
-    const logout = () => {
-        // Limpar os cookies
-        destroyCookie(null, "serenity.app.token");
-        destroyCookie(null, "serenity.app.user_id");
-    
-        window.location.reload();
-    };
-    
-
-
     return(
-        <AuthContext.Provider value={{ register, login, logout, user_id }}>
+        <AuthContext.Provider value={{ register, login, user_id }}>
             {children}
         </AuthContext.Provider>
     )
-
 
 };
 
